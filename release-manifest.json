@@ -1,24 +1,26 @@
 {
   "bankVersion": "2026.11.03",
-  "build": "2026.11.14-session-updates.1",
+  "build": "2026.11.14-flash-history.1",
   "controlFiles": {
     ".gitattributes": "1aec5b0134f49adf69e63288ed96d91224dfc7081825bb96a3d4794c6924ad6d",
     ".github/workflows/pages.yml": "d440d77923d8c27b603c7dd21d1e3c5bc1f02c1fbd990331280a3b33b82a4e99",
-    "README.md": "756f5aad908aacfefc5b9cfd3f8dcde591a7a3bf1e5c188cb5fc12d2038fe3f1",
+    "README.md": "320f12e10c3ba5e1ecd67b80ce46c8af6375bd237c207a7ba6c255128be9d82d",
     "tools/verify_release.py": "6b5534c3cf4a0cd2d1a5c795c682282c6c08e69bea848436250bdcdcdaf57cd1"
   },
   "course": "focs",
   "formatVersion": 1,
-  "releaseSequence": 2,
+  "releaseSequence": 3,
   "repository": "Concordia-International-School-Shanghai/focs-review",
   "retainedDownloads": [
-    "offline/2026.11.14-pages.1/focs-review.zip"
+    "offline/2026.11.14-pages.1/focs-review.zip",
+    "offline/2026.11.14-session-updates.1/focs-review.zip"
   ],
   "siteFiles": {
-    "UPDATE.txt": "9c108c2487cac71609671c7786a61975d74005245ae773c602d0e42c9e1dc446",
-    "index.html": "6423a547002ecf3f083713e54f88fe3c08273ffa6aa85fe12f07ddaa1c91659f",
+    "UPDATE.txt": "947ff6ad43903db602b2e115e54720b15de0e4fd7c5a39830db3ae7722a79e7c",
+    "index.html": "3c73ab0a836bf1b17b63b7766420760e44f5b82f2ea5850bb291be7c1a5a13ad",
+    "offline/2026.11.14-flash-history.1/focs-review.zip": "66da6738d04918d7cbcf2b6cbfbbc551b4bcc1a1e4cae751a33daeddb31b273b",
     "offline/2026.11.14-pages.1/focs-review.zip": "d980c255b9805115957af6ded5456ec62402a237036563d3a49e051cc987b45e",
     "offline/2026.11.14-session-updates.1/focs-review.zip": "5a4ff5067609cc623a5a7d0c0b77ebc01192db37f752788f31ffcf91bc0e0253",
-    "release.json": "5eb622c68f95b549dc497fc323f81716d7e26b056f9192e66e97c764fce85887"
+    "release.json": "8ba8809b9c87715f2c5fff12db4e01697407237280d860a320e9a9324808ec79"
   }
 }
