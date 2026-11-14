@@ -30,8 +30,9 @@ the Build label. Later dismisses that release's notice for this profile. Checks
 are throttled and caches/network failures can delay a notice. Nothing reloads
 automatically. If saving fails, keep the tab open, export a recovery backup and
 use Try saving again before the app's Reload button will proceed.
-The currently deployed 2026.11.14-pages.1 has no update-notice code: export and
-manually reload once after your teacher posts this update to receive the feature.
+The older 2026.11.14-pages.1 has no update-notice code: export and manually reload
+once after your teacher posts an update to receive the feature. Later builds
+can notify you, but still require an explicit reload.
 Payload v8 backups require a compatible updated app. Keep older backups too;
 2026.11.14-pages.1 cannot import v8. Do not return to older app copies to edit work.
 

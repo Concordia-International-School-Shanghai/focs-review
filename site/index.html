@@ -200,6 +200,9 @@ textarea { min-height: 4.5rem; resize: vertical; }
 .module-row { border-top: 1px solid var(--line); padding: .6rem 0; }
 .module-row:first-of-type { border-top: none; }
 .saved-flash-draft { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 100%; }
+.flash-history summary { cursor: pointer; overflow-wrap: anywhere; }
+.flash-history > summary { font-weight: 600; }
+.flash-history summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .flashcard-panel h3.label { margin-top: 1rem; }
 .topic-row { border-top: 1px solid var(--line); padding: .55rem 0; }
 .topic-row:first-of-type { border-top: none; }
@@ -2097,7 +2100,7 @@ header.app.focs-release .release-marker > span { min-width: 0; }
 /* FoCS release identity and visible marker; content and progress versions are separate. */
 (function (root) {
   'use strict';
-  var info = { id: '2026.11.14-session-updates.1', releaseSequence: 2 };
+  var info = { id: '2026.11.14-flash-history.1', releaseSequence: 3 };
   if (typeof module !== 'undefined' && module.exports) module.exports = info;
   else root.AppBuild = info;
   if (typeof document !== 'undefined') {
@@ -4950,27 +4953,6 @@ window.FoCSMcqGroups = {"formatVersion":1,"moduleId":"u3","groups":[{"id":"O1","
     if (anyCards) {
       reconcileFlashRunAvailability();
       FlashRuns.active(data.flashRuns).forEach(function (run) { flashPanel.appendChild(savedFlashControls(run)); });
-      var expired = (data.flashRuns || []).filter(function (run) { return run.status === 'expired' || run.status === 'unavailable'; })
-        .sort(function (a, b) { return b.createdAt.localeCompare(a.createdAt); });
-      if (expired.length) {
-        var previous = el('details', { class: 'code-disclosure' }, [
-          el('summary', { text: 'Earlier or unavailable flashcard drafts (' + expired.length + ')' })
-        ]);
-        expired.forEach(function (run) {
-          previous.appendChild(el('details', { class: 'module-row', 'data-flash-run': run.id }, [
-            el('summary', { text: flashRunLabel(run) + ' - ' + flashRunContext(run) }),
-            el('p', { text: run.status === 'expired'
-              ? (saveFailed
-                ? 'Expired: a new local day starts a new schedule. Local saving failed; the latest draft remains on this page. Export a recovery file before closing. Unused allowance does not carry forward.'
-                : 'Expired: a new local day starts a new schedule. Earlier ratings and this draft remain saved; unused allowance does not carry forward.')
-              : 'Unavailable on this device: the original round or selection context is not available. This draft and its history are kept; your local round is unchanged.' }),
-            el('p', { text: flashRatedCount(run.view.summary) + ' of ' + run.view.queue.length + ' rated. No rating was recorded for the retained draft.' }),
-            run.view.typed ? el('pre', { class: 'saved-flash-draft', text: run.view.typed }) : null,
-            el('p', { class: 'meta', text: run.view.revealed ? 'The answer had been revealed.' : 'The answer had not been revealed.' })
-          ]));
-        });
-        flashPanel.appendChild(previous);
-      }
       // Ad hoc session runner (spec update 1, Part 2), collapsed until a
       // teacher actually hands out codes; the capability stays intact as the
       // eventual delivery vehicle for misconception resurfacing.
@@ -5200,7 +5182,39 @@ window.FoCSMcqGroups = {"formatVersion":1,"moduleId":"u3","groups":[{"id":"O1","
       ]));
     }
     frag.appendChild(missPanel);
+    var earlier = renderEarlierFlashSessions();
+    if (earlier) frag.appendChild(earlier);
     return frag;
+  }
+
+  function renderEarlierFlashSessions() {
+    var runs = (data.flashRuns || []).filter(function (run) {
+      return run.status === 'expired' || run.status === 'unavailable';
+    }).sort(function (a, b) { return b.createdAt.localeCompare(a.createdAt); });
+    if (!runs.length) return null;
+    var history = el('details', { class: 'panel flash-history', id: 'earlier-flash-sessions' }, [
+      el('summary', { text: 'Earlier flashcard sessions' }),
+      el('p', { text: saveFailed
+        ? 'Local saving failed. Session records and ratings remain on this page. Export a recovery file before closing.'
+        : 'Recorded ratings remain saved.' })
+    ]);
+    runs.forEach(function (run) {
+      var rated = run.view.summary.correct + run.view.summary.missed;
+      var reason = run.status === 'expired'
+        ? 'Expired: a new local day began.'
+        : 'Unavailable: the original round or selection context is not available on this device.';
+      history.appendChild(el('details', { class: 'module-row', 'data-flash-run': run.id }, [
+        el('summary', { text: flashRunLabel(run) + ' - ' + new Date(run.createdAt).toLocaleString() +
+          ' - ' + rated + ' of ' + run.view.queue.length + ' rated. ' + reason }),
+        el('p', { text: flashRunContext(run) }),
+        run.status === 'expired' ? el('p', { text: 'Unused allowance does not carry forward.' }) : null,
+        run.view.summary.unknown ? el('p', { text: run.view.summary.unknown + ' earlier completed cards have no recorded rating detail.' }) : null,
+        run.view.typed ? el('p', { text: 'Saved answer' }) : el('p', { text: 'No saved answer text.' }),
+        run.view.typed ? el('pre', { class: 'saved-flash-draft', text: run.view.typed }) : null,
+        el('p', { text: run.view.revealed ? 'The answer had been revealed.' : 'The answer had not been revealed.' })
+      ]));
+    });
+    return history;
   }
 
   // -------------------------------------------------------------------------
