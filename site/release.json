@@ -1,0 +1,8 @@
+{
+  "bankVersion": "2026.11.03",
+  "build": "2026.11.14-pages.1",
+  "course": "focs",
+  "htmlSha256": "ec7978627df466ad1144d3b747833fca9c6930bb25834f6033682dd46131304b",
+  "offlineZip": "offline/2026.11.14-pages.1/focs-review.zip",
+  "offlineZipSha256": "d980c255b9805115957af6ded5456ec62402a237036563d3a49e051cc987b45e"
+}

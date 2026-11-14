@@ -1,0 +1,28 @@
+REVIEW APP: HOSTED AND OFFLINE PROGRESS
+
+1. In your current compatible app, choose Export all progress. Confirm the JSON
+   backup actually exists and keep it with your old app file. Do not clear data.
+2. Close other copies/tabs. Open the new course link or unzip the offline download
+   and open its HTML in your supported browser. Use the same Student id.
+3. Import the checked backup. Hosted and downloaded files do not automatically
+   share progress, even on the same computer. Check your history, unfinished
+   work, Covered through and Assessment completed. Export and check a fresh backup.
+4. Use one active copy/tab per course and keep current compatible backups.
+   Before switching between hosted/offline copies or devices, export and check
+   a backup, then import it into the destination. Do not switch without transferring
+   newer work. An older app is not guaranteed to understand newer progress.
+
+Download offline copy (ZIP) downloads the application, not your progress. Unzip
+it before opening the HTML. Keep a separate Export all progress JSON backup.
+If school networking blocks the hosted app, use the downloaded matching copy
+and import your checked backup. No account or cloud sync is provided.
+
+If a familiar page still shows an older build, export first, close it and reopen
+the intended course URL. Compare its visible Build label with the teacher's label.
+If the Build label remains old, export your progress and confirm the backup,
+reload the page, then check the Build label again. An already-open page does not
+automatically update. Never clear site data or browser data to force an update.
+Stop and keep both files if anything is missing.
+
+Your progress stays in this browser; downloading a backup does not submit it.
+Submit only the progress JSON when requested, not the app ZIP or HTML.
