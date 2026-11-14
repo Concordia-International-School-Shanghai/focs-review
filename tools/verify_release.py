@@ -69,8 +69,15 @@ def verify(root, expected):
             if name == zpath and offline != html:
                 raise ValueError('Hosted/offline HTML byte mismatch.')
     info = json.loads((root / 'site/release.json').read_bytes())
-    if info != {'build': build, 'course': course, 'bankVersion': m['bankVersion'],
-                'htmlSha256': sha(html), 'offlineZip': zpath, 'offlineZipSha256': m['siteFiles'][zpath]}:
+    expected_info = {'build': build, 'course': course, 'bankVersion': m['bankVersion'],
+                     'htmlSha256': sha(html), 'offlineZip': zpath, 'offlineZipSha256': m['siteFiles'][zpath]}
+    # Older immutable downloads/manifests predate update notices and stay valid.
+    if 'releaseSequence' in m:
+        sequence = m['releaseSequence']
+        if type(sequence) is not int or sequence < 1 or ('releaseSequence: ' + str(sequence) + ' }').encode() not in html:
+            raise ValueError('Release sequence/HTML mismatch.')
+        expected_info.update(formatVersion=1, releaseSequence=sequence)
+    if info != expected_info:
         raise ValueError('Public release information mismatch.')
     return m
 
