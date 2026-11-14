@@ -1,0 +1,20 @@
+{
+  "bankVersion": "2026.11.03",
+  "build": "2026.11.14-pages.1",
+  "controlFiles": {
+    ".gitattributes": "1aec5b0134f49adf69e63288ed96d91224dfc7081825bb96a3d4794c6924ad6d",
+    ".github/workflows/pages.yml": "d440d77923d8c27b603c7dd21d1e3c5bc1f02c1fbd990331280a3b33b82a4e99",
+    "README.md": "703904a02056d9a0baf635b6b7472b7ecc238848954fedcc76cf3e6b622a4fe5",
+    "tools/verify_release.py": "71ddf125f632cbe67b724a0b1490b5ab60dbeca34135724d196fde022b618eb9"
+  },
+  "course": "focs",
+  "formatVersion": 1,
+  "repository": "Concordia-International-School-Shanghai/focs-review",
+  "retainedDownloads": [],
+  "siteFiles": {
+    "UPDATE.txt": "02778a7430b731ffa9abd262ab198fe06b748a9a7fdc6681302937936fe5369e",
+    "index.html": "ec7978627df466ad1144d3b747833fca9c6930bb25834f6033682dd46131304b",
+    "offline/2026.11.14-pages.1/focs-review.zip": "d980c255b9805115957af6ded5456ec62402a237036563d3a49e051cc987b45e",
+    "release.json": "3bb2634acf6b3a6b0494d6b074f0238dc4d70f53d60345ad587bbe7f891e5ae0"
+  }
+}
