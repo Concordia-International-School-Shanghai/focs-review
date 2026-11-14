@@ -239,6 +239,12 @@ details.code-disclosure[open] summary { margin-bottom: .5rem; }
 .free-response summary:focus-visible { outline: 3px solid #245da8; outline-offset: 3px; }
 .free-response-solution { margin-top: 1.2rem; border-top: 2px solid #cbd3dc; }
 .free-response-criterion { padding: .5rem 0; border-top: 1px solid #cbd3dc; }
+/* Hosted notification is in document flow, not a modal or focus-stealing toast. */
+.app-update { max-width: 1100px; margin: 12px auto; padding: 12px 16px; border: 2px solid #916300; background: #fff8df; color: #29251c; }
+.app-update[hidden] { display: none; }
+.app-update p { margin: 0 0 8px; }
+.app-update .meta { color: #514838; font-size: 14px; margin-top: 8px; }
+.app-update .btn-row { flex-wrap: wrap; }
 
 /* FoCS Unit 3 MCQs/written tasks only; no flashcard or other-course changes. */
 .focs-u3-practice pre,
@@ -2091,7 +2097,7 @@ header.app.focs-release .release-marker > span { min-width: 0; }
 /* FoCS release identity and visible marker; content and progress versions are separate. */
 (function (root) {
   'use strict';
-  var info = { id: '2026.11.14-pages.1' };
+  var info = { id: '2026.11.14-session-updates.1', releaseSequence: 2 };
   if (typeof module !== 'undefined' && module.exports) module.exports = info;
   else root.AppBuild = info;
   if (typeof document !== 'undefined') {
@@ -2110,6 +2116,115 @@ header.app.focs-release .release-marker > span { min-width: 0; }
   link.href = 'offline/' + window.AppBuild.id + '/' + link.dataset.course + '-review.zip';
   document.getElementById('offline-copy').hidden = false;
 })();
+
+</script>
+  <script>
+/* Same-origin release notices only; no learning records or automatic reloads. */
+(function (root, factory) {
+  'use strict';
+  var api = factory();
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.HostedUpdates = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  var THROTTLE_MS = 5 * 60 * 1000;
+  function validate(value, course) {
+    if (!value || typeof value !== 'object' || Array.isArray(value) ||
+        value.formatVersion !== 1 || value.course !== course ||
+        !Number.isSafeInteger(value.releaseSequence) || value.releaseSequence < 1 ||
+        typeof value.build !== 'string' || !/^\d{4}\.\d{2}\.\d{2}-[a-z0-9-]+\.\d+$/.test(value.build) ||
+        typeof value.bankVersion !== 'string' || !/^\d{4}\.\d{2}\.\d{2}$/.test(value.bankVersion) ||
+        typeof value.htmlSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(value.htmlSha256) ||
+        typeof value.offlineZipSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(value.offlineZipSha256) ||
+        value.offlineZip !== 'offline/' + value.build + '/' + course + '-review.zip') return null;
+    return value;
+  }
+  function newer(value, current) {
+    return value && value.releaseSequence > current.releaseSequence && value.build !== current.id;
+  }
+  function mount(opts) {
+    if (!/^https?:$/.test(window.location.protocol)) return { refresh: function () {} };
+    var profile, generation = 0, lastCheck = -Infinity, pending = null, release = null;
+    var highest = opts.build.releaseSequence, dismissed = {}, panel, message, exportButton, detail;
+    function key() { return opts.course + '_review:' + (profile ? profile.studentId : 'no-profile') + ':update-dismissed'; }
+    function dismissedThrough() {
+      var k = key(), saved = 0;
+      try { saved = Number(localStorage.getItem(k)) || 0; } catch (_) { /* memory fallback */ }
+      return Math.max(saved, dismissed[k] || 0);
+    }
+    function hide() { if (panel) panel.hidden = true; }
+    function show() {
+      if (!release || !newer(release, opts.build) || release.releaseSequence <= dismissedThrough()) { hide(); return; }
+      if (!panel) {
+        panel = document.createElement('aside'); panel.id = 'app-update'; panel.className = 'app-update';
+        panel.setAttribute('aria-label', 'App update'); panel.hidden = true;
+        message = document.createElement('p'); message.setAttribute('role', 'status');
+        message.textContent = 'An app update is available. Export your progress before reloading.';
+        panel.appendChild(message);
+        var buttons = document.createElement('div'); buttons.className = 'btn-row'; panel.appendChild(buttons);
+        function button(text, fn) { var b = document.createElement('button'); b.textContent = text; b.addEventListener('click', fn); buttons.appendChild(b); return b; }
+        exportButton = button('Export all progress', function () {
+          refresh();
+          if (!opts.profile()) return;
+          opts.checkpoint(); opts.exportAll();
+        });
+        button('Reload', function () {
+          refresh();
+          if (!opts.checkpoint()) {
+            detail.textContent = 'Reload stopped: saving failed. Export all progress, check the backup file, and use Try saving again before reloading. Keep this tab open.';
+            return;
+          }
+          window.location.reload();
+        });
+        button('Later', function () {
+          refresh();
+          if (!release) return;
+          dismissed[key()] = release.releaseSequence;
+          try { localStorage.setItem(key(), String(release.releaseSequence)); } catch (_) { /* no progress writes */ }
+          hide();
+          var app = document.getElementById('app'); app.tabIndex = -1; app.focus({ preventScroll: true });
+        });
+        detail = document.createElement('p'); detail.className = 'meta'; panel.appendChild(detail);
+        document.getElementById('app').before(panel);
+      }
+      exportButton.disabled = !profile;
+      detail.textContent = 'Available build ' + release.build + '. A download request does not confirm a backup was saved.';
+      panel.hidden = false;
+    }
+    async function check() {
+      if (document.visibilityState === 'hidden' || pending || Date.now() - lastCheck < THROTTLE_MS) return;
+      lastCheck = Date.now();
+      var token = generation, owner = profile, controller = new AbortController();
+      pending = controller;
+      var timeout = setTimeout(function () { controller.abort(); }, 8000);
+      try {
+        var url = new URL('release.json', window.location.href);
+        var response = await fetch(url.href, { cache: 'no-store', credentials: 'omit', redirect: 'error', signal: controller.signal });
+        if (!response.ok) return;
+        var text = await response.text();
+        if (text.length > 4096) return;
+        var value = validate(JSON.parse(text), opts.course);
+        if (token !== generation || owner !== opts.profile() || !value || !newer(value, opts.build) || value.releaseSequence < highest) return;
+        highest = value.releaseSequence; release = value; show();
+      } catch (_) { /* Unavailable, delayed or malformed metadata never interrupts practice. */ }
+      finally { clearTimeout(timeout); if (pending === controller) pending = null; }
+    }
+    function refresh() {
+      var current = opts.profile();
+      if (current !== profile) {
+        profile = current; generation++; lastCheck = -Infinity;
+        if (pending) pending.abort(); pending = null; release = null; hide();
+        check();
+      }
+    }
+    function returned() { refresh(); check(); }
+    document.addEventListener('visibilitychange', returned);
+    window.addEventListener('focus', returned);
+    refresh(); check();
+    return { refresh: refresh };
+  }
+  return { validate: validate, newer: newer, mount: mount, THROTTLE_MS: THROTTLE_MS };
+});
 
 </script>
   <script>
@@ -2709,7 +2824,7 @@ header.app.focs-release .release-marker > span { min-width: 0; }
   else root.McqSessions = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  var statuses = ['active', 'unavailable', 'restarted', 'completed'];
+  var statuses = ['active', 'unavailable', 'restarted', 'ended', 'completed'];
   var confidences = ['sure', 'unsure', 'guessing'];
   function copy(v) { return JSON.parse(JSON.stringify(v)); }
   function object(v) { return v && typeof v === 'object' && !Array.isArray(v); }
@@ -2752,6 +2867,12 @@ header.app.focs-release .release-marker > span { min-width: 0; }
   function close(run, status, now, replacementId) {
     run.status = status; run.closedAt = now; run.replacementId = replacementId || null; touch(run, now);
   }
+  function end(run, now) {
+    if (!run || run.status !== 'active' || !date(now)) return false;
+    close(run, 'ended', now);
+    run.closeReason = 'student-ended';
+    return true;
+  }
   function find(list, id) { return (list || []).find(function (r) { return r.id === id; }) || null; }
   function active(list, c) {
     return (list || []).filter(function (r) { return r.status === 'active' && (!c || key(r.context) === key(c)); });
@@ -2785,6 +2906,8 @@ header.app.focs-release .release-marker > span { min-width: 0; }
         !strings(value.poolIds) || !Array.isArray(value.originalQueue) || !object(value.versions) ||
         !object(value.categories) || !object(value.view)) return null;
     var v = value.view;
+    if (value.status === 'ended' && (!date(value.closedAt) ||
+        value.closeReason !== 'student-ended' || value.replacementId !== null)) return null;
     if (!strings(v.queue) || !Number.isInteger(v.idx) || v.idx < 0 || v.idx > v.queue.length ||
         !Array.isArray(v.attempts) || !v.attempts.every(validAttempt) ||
         !value.originalQueue.every(function (q) { return object(q) && typeof q.itemId === 'string' &&
@@ -2906,7 +3029,7 @@ header.app.focs-release .release-marker > span { min-width: 0; }
       summary: { total: v.summary.total, answered: v.summary.answered, correct: v.summary.correct },
       attempts: v.attempts.slice() };
   }
-  return { context: context, key: key, create: create, touch: touch, close: close, find: find, active: active,
+  return { context: context, key: key, create: create, touch: touch, close: close, end: end, find: find, active: active,
     read: read, merge: merge, resolveContext: resolveContext, mergeAttempts: mergeAttempts, mergeCompleted: mergeCompleted,
     reconcile: reconcile, complete: complete, summary: summary };
 });
@@ -3011,7 +3134,7 @@ window.FoCSMcqGroups = {"formatVersion":1,"moduleId":"u3","groups":[{"id":"O1","
     }));
   }
   function validate(p, identity) {
-    if (!object(p) || !Number.isInteger(p.v) || p.v < 1 || p.v > 7) throw Error('Unsupported progress payload version. Keep this file and use a compatible app.');
+    if (!object(p) || !Number.isInteger(p.v) || p.v < 1 || p.v > 8) throw Error('Unsupported progress payload version. Keep this file and use a compatible app.');
     if (p.courseId && p.courseId !== identity.courseId) throw Error('Different course identity.');
     if ((p.v >= 7 || p.studentId != null) && p.studentId !== identity.studentId) throw Error('Different student identity.');
     if (p.v < 7) return;
@@ -3286,7 +3409,7 @@ window.FoCSMcqGroups = {"formatVersion":1,"moduleId":"u3","groups":[{"id":"O1","
 
   // The progress payload version (data.v). Never the wrapper's v, which is
   // the signing key id.
-  var PAYLOAD_VERSION = 7;
+  var PAYLOAD_VERSION = 8;
   var SESSION_TYPES = ['daily', 'extra', 'session-code', 'practice-now', 'targeted-review'];
   var DEVICE_ID_RE = /^[0-9a-z]{6,32}$/;
 
@@ -4176,6 +4299,7 @@ window.FoCSMcqGroups = {"formatVersion":1,"moduleId":"u3","groups":[{"id":"O1","
   var MANIFEST = null;
   var COURSE_SEQ = [];
   var studentId = null;  // active student
+  var hostedUpdates = null;
   var data = null;       // the current student's progress object
   var device = null;     // { deviceId, reviewSeq }, see DEVICE_KEY
   var privateDevice = false; // recovery identity not yet published to storage
@@ -4242,6 +4366,9 @@ window.FoCSMcqGroups = {"formatVersion":1,"moduleId":"u3","groups":[{"id":"O1","
       navigator.storage.persist().catch(function () { /* best effort */ });
     }
     render();
+    hostedUpdates = window.HostedUpdates.mount({ course: courseId(), build: window.AppBuild,
+      profile: function () { return data || null; }, checkpoint: checkpointForUpdate,
+      exportAll: exportProgress });
   }).catch(function (err) {
     appEl.textContent = 'Could not load the item bank: ' + err;
   });
@@ -4622,6 +4749,7 @@ window.FoCSMcqGroups = {"formatVersion":1,"moduleId":"u3","groups":[{"id":"O1","
   // Render router
   // -------------------------------------------------------------------------
   function render() {
+    if (hostedUpdates) hostedUpdates.refresh();
     whoEl.textContent = (studentId ? ('Student ' + studentId) : '') + (previewActive ? ' | PREVIEW MODE (sandbox, this device only)' : '');
     clear(appEl);
     var v = view.name;
@@ -6104,9 +6232,25 @@ window.FoCSMcqGroups = {"formatVersion":1,"moduleId":"u3","groups":[{"id":"O1","
           onClick: function () {
             var c = Mcq.context(run.context); c.unansweredOnly = false;
             startMcq(restartPool(run), c, run);
-          } })
+          } }),
+        el('button', { text: 'End session', onClick: function () { endMcq(run); } })
       ])
     ]);
+  }
+
+  function endMcq(selected) {
+    var run = data && Mcq.find(data.mcqRuns, selected.id);
+    if (!run || run.status !== 'active' || run.studentId !== studentId || run.courseId !== courseId()) return;
+    if (!window.confirm('End this session? It will leave your unfinished list. Your saved work will remain in your progress export.')) return;
+    if (!Mcq.end(run, new Date().toISOString())) return;
+    if (data.mcqResumeId === run.id) data.mcqResumeId = null;
+    view = { name: 'home' };
+    var saved = save();
+    render();
+    var heading = appEl.querySelector('h2');
+    if (heading) { heading.tabIndex = -1; heading.focus(); }
+    toast(saved ? 'Session ended. Its saved work remains in Export all progress.' :
+      'Session ended on this page only. Saving failed; export your recovery file and retry saving before closing.');
   }
 
   function renderSavedMcq() {
@@ -6148,7 +6292,8 @@ window.FoCSMcqGroups = {"formatVersion":1,"moduleId":"u3","groups":[{"id":"O1","
           onClick: function () {
             Mcq.resolveContext(data.mcqRuns, run, new Date().toISOString());
             resumeMcq(run);
-          } })
+          } }),
+        el('button', { text: 'End session', onClick: function () { endMcq(run); } })
       ]));
     });
     panel.appendChild(el('p', { text: 'Start fresh includes previously answered questions. It closes unfinished sessions matching the original or new settings, but keeps their submitted answers.' }));
@@ -6901,6 +7046,14 @@ window.FoCSMcqGroups = {"formatVersion":1,"moduleId":"u3","groups":[{"id":"O1","
     markExported();
     toast((previewActive ? 'Preview backup' : 'Backup') + ' download requested. Check that the file was saved.' +
       (saveFailed ? ' Keep this page open while local saving is unavailable.' : ''), true);
+  }
+
+  function checkpointForUpdate() {
+    if (!data || !studentId) return true;
+    // Input/change handlers already checkpoint no-blur flash, MCQ and written
+    // drafts. Preserve the live flash view without rating or changing its day.
+    if (view.name === 'flash' || view.name === 'flashDone') checkpointFlash(false);
+    return save();
   }
 
   // Paste-string variant: gzip via the browser's CompressionStream when

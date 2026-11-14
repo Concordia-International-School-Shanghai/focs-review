@@ -1,8 +1,10 @@
 {
   "bankVersion": "2026.11.03",
-  "build": "2026.11.14-pages.1",
+  "build": "2026.11.14-session-updates.1",
   "course": "focs",
-  "htmlSha256": "ec7978627df466ad1144d3b747833fca9c6930bb25834f6033682dd46131304b",
-  "offlineZip": "offline/2026.11.14-pages.1/focs-review.zip",
-  "offlineZipSha256": "d980c255b9805115957af6ded5456ec62402a237036563d3a49e051cc987b45e"
+  "formatVersion": 1,
+  "htmlSha256": "6423a547002ecf3f083713e54f88fe3c08273ffa6aa85fe12f07ddaa1c91659f",
+  "offlineZip": "offline/2026.11.14-session-updates.1/focs-review.zip",
+  "offlineZipSha256": "5a4ff5067609cc623a5a7d0c0b77ebc01192db37f752788f31ffcf91bc0e0253",
+  "releaseSequence": 2
 }

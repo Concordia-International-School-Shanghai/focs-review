@@ -24,5 +24,16 @@ reload the page, then check the Build label again. An already-open page does not
 automatically update. Never clear site data or browser data to force an update.
 Stop and keep both files if anything is missing.
 
+After this capability is installed, a hosted page can show an app-update notice.
+Choose Export all progress and confirm the backup exists, then Reload and check
+the Build label. Later dismisses that release's notice for this profile. Checks
+are throttled and caches/network failures can delay a notice. Nothing reloads
+automatically. If saving fails, keep the tab open, export a recovery backup and
+use Try saving again before the app's Reload button will proceed.
+The currently deployed 2026.11.14-pages.1 has no update-notice code: export and
+manually reload once after your teacher posts this update to receive the feature.
+Payload v8 backups require a compatible updated app. Keep older backups too;
+2026.11.14-pages.1 cannot import v8. Do not return to older app copies to edit work.
+
 Your progress stays in this browser; downloading a backup does not submit it.
 Submit only the progress JSON when requested, not the app ZIP or HTML.
