@@ -1,7 +1,7 @@
 # FoCS Review
 
 Student-artifact publishing repository, not the maintained engine source.
-Prepared build: `2026.11.14-flash-history.1`. Intended project URL: https://concordia-international-school-shanghai.github.io/focs-review/.
+Prepared build: `2026.11.15-practice-spacing.1`. Intended project URL: https://concordia-international-school-shanghai.github.io/focs-review/.
 
 The hosted index and the named HTML inside its offline ZIP are byte-identical.
 See [update and backup guidance](site/UPDATE.txt). There is no cloud progress sync.
