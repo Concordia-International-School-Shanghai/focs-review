@@ -17,8 +17,9 @@ it before opening the HTML. Keep a separate Export all progress JSON backup.
 If school networking blocks the hosted app, use the downloaded matching copy
 and import your checked backup. No account or cloud sync is provided.
 
-If a familiar page still shows an older build, export first, close it and reopen
-the intended course URL. Compare its visible Build label with the teacher's label.
+Open Settings > About this app to check the Build label, update date and bank.
+If it still shows an older build, export first, close it and reopen the intended
+course URL. Compare its Build label with the teacher's label.
 If the Build label remains old, export your progress and confirm the backup,
 reload the page, then check the Build label again. An already-open page does not
 automatically update. Never clear site data or browser data to force an update.
@@ -26,7 +27,7 @@ Stop and keep both files if anything is missing.
 
 After this capability is installed, a hosted page can show an app-update notice.
 Choose Export all progress and confirm the backup exists, then Reload and check
-the Build label. Later dismisses that release's notice for this profile. Checks
+the Build label in Settings > About this app. Later dismisses that release's notice for this profile. Checks
 are throttled and caches/network failures can delay a notice. Nothing reloads
 automatically. If saving fails, keep the tab open, export a recovery backup and
 use Try saving again before the app's Reload button will proceed.
