@@ -2178,7 +2178,7 @@ details.code-disclosure[open] summary { margin-bottom: .5rem; }
 /* FoCS release identity and visible marker; content and progress versions are separate. */
 (function (root) {
   'use strict';
-  var info = { id: '2026.11.15-practice-spacing.1', releaseSequence: 6 };
+  var info = { id: '2026.11.15-due-status.1', releaseSequence: 7 };
   if (typeof module !== 'undefined' && module.exports) module.exports = info;
   else root.AppBuild = info;
   if (typeof document !== 'undefined') {
@@ -5058,9 +5058,28 @@ window.FoCSMcqGroups = {"formatVersion":1,"moduleId":"u3","groups":[{"id":"O1","
       flashPanel.appendChild(el('p', { class: 'muted', text: remaining.length
         ? ('Today: ' + remaining.length + ' card' + (remaining.length === 1 ? '' : 's') + ' (' + dueCount + ' review, ' + newCount + ' new).')
         : emptyFlashScheduleText() }));
+      if (view.scheduleChecked === today()) {
+        var checkedView = view;
+        var status = el('p', { id: 'schedule-check-status', role: 'status',
+          'aria-live': 'polite', 'aria-atomic': 'true', tabindex: '-1' });
+        flashPanel.appendChild(status);
+        // Populate the mounted live region, after any reconciliation saves.
+        setTimeout(function () {
+          if (!status.isConnected || view !== checkedView) return;
+          status.textContent = scheduleCheckText(remaining.length, extra.length);
+          if (checkedView.scheduleCheckFocus) {
+            (document.getElementById('check-due-cards') || status).focus({ preventScroll: true });
+            checkedView.scheduleCheckFocus = false;
+          }
+        }, 0);
+      }
       flashPanel.appendChild(el('div', { class: 'btn-row' }, [
         el('button', { class: 'primary', disabled: remaining.length === 0, text: 'Start today\u2019s session', onClick: function () { startFlash(); } }),
-        !remaining.length ? el('button', { text: 'Check schedule', onClick: function () { render(); } }) : null,
+        !remaining.length ? el('button', { id: 'check-due-cards', text: 'Check for due cards', onClick: function (event) {
+          view.scheduleChecked = today();
+          view.scheduleCheckFocus = event.detail === 0;
+          render();
+        } }) : null,
         (!remaining.length && extra.length)
           ? el('button', { text: 'Extra round (' + extra.length + ')', onClick: startExtraRound })
           : null,
@@ -5513,6 +5532,20 @@ window.FoCSMcqGroups = {"formatVersion":1,"moduleId":"u3","groups":[{"id":"O1","
       : 'No flashcards are scheduled right now. Cards can become due later today.';
     if (fs.extraUsed) text += ' Today\u2019s extra round has been used.';
     return text + ' MCQ practice remains available below.';
+  }
+
+  function scheduleCheckText(remaining, extra) {
+    var capacity = Flash.dailyCapacity(data);
+    var allowance = !capacity.budget || (!capacity.due && !capacity.fresh)
+      ? 'Today\u2019s daily flashcard allowance is used.'
+      : !capacity.due ? 'Today\u2019s daily review allowance is used.' : '';
+    var count = remaining || extra;
+    var result = count ? count + (count === 1 ? ' card is ready to practice.' : ' cards are ready to practice.')
+      : allowance || 'No additional cards are scheduled right now.';
+    if (!remaining && extra) result += ' ' + (allowance ? allowance + ' ' : '') + 'The extra round is available below.';
+    if (!count && data.flashSession.extraUsed) result += ' Today\u2019s extra round has been used.';
+    return (saveFailed ? 'Schedule checked on this page only. ' : 'Schedule checked. ') + result +
+      (saveFailed ? ' Changes could not be saved on this device. Keep this page open and use the recovery options above.' : '');
   }
 
   function expireFlashRuns() {

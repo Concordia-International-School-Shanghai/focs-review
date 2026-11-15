@@ -1,10 +1,10 @@
 {
   "bankVersion": "2026.11.03",
-  "build": "2026.11.15-practice-spacing.1",
+  "build": "2026.11.15-due-status.1",
   "course": "focs",
   "formatVersion": 1,
-  "htmlSha256": "52371f38f4bc63dc3dc6ac5a06071fe1260c2e09353d4d67a56baaff6f3f596b",
-  "offlineZip": "offline/2026.11.15-practice-spacing.1/focs-review.zip",
-  "offlineZipSha256": "f0f12955439a2e4302c75c0f52aca26389af797a3141845b2ad805e0987b66b1",
-  "releaseSequence": 6
+  "htmlSha256": "ad7da9420ace0a30a44e3392c56fa38d848b6960057e2ff22f2844f77282c7d4",
+  "offlineZip": "offline/2026.11.15-due-status.1/focs-review.zip",
+  "offlineZipSha256": "1d055653aa69a4ce2195acae1c7da2efe2b05dd98c900a66e4fbb7e5acb29454",
+  "releaseSequence": 7
 }
