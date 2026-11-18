@@ -1,10 +1,10 @@
 {
-  "bankVersion": "2026.11.03",
-  "build": "2026.11.15-due-status.1",
+  "bankVersion": "2026.11.18",
+  "build": "2026.11.18-focs-unit4.1",
   "course": "focs",
   "formatVersion": 1,
-  "htmlSha256": "ad7da9420ace0a30a44e3392c56fa38d848b6960057e2ff22f2844f77282c7d4",
-  "offlineZip": "offline/2026.11.15-due-status.1/focs-review.zip",
-  "offlineZipSha256": "1d055653aa69a4ce2195acae1c7da2efe2b05dd98c900a66e4fbb7e5acb29454",
-  "releaseSequence": 7
+  "htmlSha256": "a2e538154900c570645797b5d8822accedb8e20fee998f6a9e0e9a2a8a4c6862",
+  "offlineZip": "offline/2026.11.18-focs-unit4.1/focs-review.zip",
+  "offlineZipSha256": "2203e186d2d9f2561310c0631f31410be0ca90634d11d4dab7114a729a19146c",
+  "releaseSequence": 8
 }
